@@ -1,11 +1,15 @@
 package sn.examen.designpattern.badwalletapi.service;
 
+import sn.examen.designpattern.badwalletapi.decorator.BaseWithdrawalCalculation;
+import sn.examen.designpattern.badwalletapi.decorator.CappedPercentageFeeDecorator;
+import sn.examen.designpattern.badwalletapi.decorator.WithdrawalCalculation;
 import sn.examen.designpattern.badwalletapi.domain.Transaction;
 import sn.examen.designpattern.badwalletapi.domain.Wallet;
 import sn.examen.designpattern.badwalletapi.dto.WalletCreateRequest;
 import sn.examen.designpattern.badwalletapi.exception.InvalidOperationException;
 import sn.examen.designpattern.badwalletapi.exception.WalletNotFoundException;
 import sn.examen.designpattern.badwalletapi.operation.DepositOperation;
+import sn.examen.designpattern.badwalletapi.operation.WithdrawOperation;
 import sn.examen.designpattern.badwalletapi.repository.TransactionRepository;
 import sn.examen.designpattern.badwalletapi.repository.WalletRepository;
 import sn.examen.designpattern.badwalletapi.strategy.DepositStrategyFactory;
@@ -74,5 +78,11 @@ public class WalletService {
         var strategy = depositStrategyFactory.forPaymentMethod(paymentMethod);
         return new DepositOperation(wallet, amount, paymentMethod, strategy, walletRepository, transactionRepository)
                 .execute();
+    }
+
+    public List<Transaction> withdraw(String phoneNumber, BigDecimal amount) {
+        Wallet wallet = getByPhone(phoneNumber);
+        WithdrawalCalculation calculation = new CappedPercentageFeeDecorator(new BaseWithdrawalCalculation());
+        return new WithdrawOperation(wallet, amount, calculation, walletRepository, transactionRepository).execute();
     }
 }
