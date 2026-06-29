@@ -2,6 +2,8 @@ package sn.examen.designpattern.badwalletapi.controller;
 
 import sn.examen.designpattern.badwalletapi.domain.Wallet;
 import sn.examen.designpattern.badwalletapi.dto.BalanceResponse;
+import sn.examen.designpattern.badwalletapi.dto.DepositRequest;
+import sn.examen.designpattern.badwalletapi.dto.TransactionResponse;
 import sn.examen.designpattern.badwalletapi.dto.WalletCreateRequest;
 import sn.examen.designpattern.badwalletapi.dto.WalletResponse;
 import sn.examen.designpattern.badwalletapi.service.WalletService;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/wallets")
@@ -50,5 +54,11 @@ public class WalletController {
     public BalanceResponse getBalance(@PathVariable String phone) {
         Wallet wallet = walletService.getByPhone(phone);
         return new BalanceResponse(wallet.getPhoneNumber(), wallet.getBalance(), wallet.getCurrency());
+    }
+
+    @PostMapping("/{id}/deposit")
+    public List<TransactionResponse> deposit(@PathVariable Long id, @Valid @RequestBody DepositRequest request) {
+        return walletService.deposit(id, request.getAmount(), request.getPaymentMethod())
+                .stream().map(TransactionResponse::new).toList();
     }
 }
