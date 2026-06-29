@@ -118,7 +118,7 @@ public class FactureService {
         return new PaymentReceiptDto(walletCode, serviceName, totalCharged, paidReferences);
     }
 
-    private List<FactureDto> toDtos(List<Facture> factures) {
+    public List<FactureDto> toDtos(List<Facture> factures) {
         return factures.stream()
                 .map(f -> new FactureDto(f, billingRuleFactory.forService(f.getServiceName()).computeAmountDue(f)))
                 .collect(Collectors.toList());

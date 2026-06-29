@@ -2,8 +2,10 @@ package sn.examen.designpattern.paymentservice.controller;
 
 import sn.examen.designpattern.paymentservice.domain.ServiceName;
 import sn.examen.designpattern.paymentservice.dto.FactureDto;
+import sn.examen.designpattern.paymentservice.dto.InitFacturesRequest;
 import sn.examen.designpattern.paymentservice.dto.PaymentReceiptDto;
 import sn.examen.designpattern.paymentservice.dto.PaymentRequestDto;
+import sn.examen.designpattern.paymentservice.service.FactureInitializationService;
 import sn.examen.designpattern.paymentservice.service.FactureService;
 
 import jakarta.validation.Valid;
@@ -26,9 +28,17 @@ import java.util.List;
 public class FactureController {
 
     private final FactureService factureService;
+    private final FactureInitializationService initializationService;
 
-    public FactureController(FactureService factureService) {
+    public FactureController(FactureService factureService, FactureInitializationService initializationService) {
         this.factureService = factureService;
+        this.initializationService = initializationService;
+    }
+
+    @PostMapping("/init")
+    public ResponseEntity<List<FactureDto>> init(@Valid @RequestBody InitFacturesRequest request) {
+        List<FactureDto> created = factureService.toDtos(initializationService.initializeFor(request.getWalletCode()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping("/{code}/current")
