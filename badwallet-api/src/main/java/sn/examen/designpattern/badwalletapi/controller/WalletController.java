@@ -4,6 +4,8 @@ import sn.examen.designpattern.badwalletapi.domain.Wallet;
 import sn.examen.designpattern.badwalletapi.dto.BalanceResponse;
 import sn.examen.designpattern.badwalletapi.dto.DepositRequest;
 import sn.examen.designpattern.badwalletapi.dto.TransactionResponse;
+import sn.examen.designpattern.badwalletapi.dto.PayFacturesRequest;
+import sn.examen.designpattern.badwalletapi.dto.PayRequest;
 import sn.examen.designpattern.badwalletapi.dto.WalletCreateRequest;
 import sn.examen.designpattern.badwalletapi.dto.TransferRequest;
 import sn.examen.designpattern.badwalletapi.dto.WalletResponse;
@@ -73,6 +75,18 @@ public class WalletController {
     @PostMapping("/transfer")
     public List<TransactionResponse> transfer(@Valid @RequestBody TransferRequest request) {
         return walletService.transfer(request.getSenderPhone(), request.getReceiverPhone(), request.getAmount())
+                .stream().map(TransactionResponse::new).toList();
+    }
+
+    @PostMapping("/pay")
+    public List<TransactionResponse> pay(@Valid @RequestBody PayRequest request) {
+        return walletService.payCurrentMonthBill(request.getPhoneNumber(), request.getServiceName(), request.getAmount())
+                .stream().map(TransactionResponse::new).toList();
+    }
+
+    @PostMapping("/pay-factures")
+    public List<TransactionResponse> payFactures(@Valid @RequestBody PayFacturesRequest request) {
+        return walletService.payFactures(request.getPhoneNumber(), request.getServiceName(), request.getFactureReferences())
                 .stream().map(TransactionResponse::new).toList();
     }
 }

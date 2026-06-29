@@ -8,7 +8,10 @@ import sn.examen.designpattern.badwalletapi.domain.Wallet;
 import sn.examen.designpattern.badwalletapi.dto.WalletCreateRequest;
 import sn.examen.designpattern.badwalletapi.exception.InvalidOperationException;
 import sn.examen.designpattern.badwalletapi.exception.WalletNotFoundException;
+import sn.examen.designpattern.badwalletapi.gateway.BillPaymentGateway;
+import sn.examen.designpattern.badwalletapi.gateway.PaymentReceipt;
 import sn.examen.designpattern.badwalletapi.operation.DepositOperation;
+import sn.examen.designpattern.badwalletapi.operation.PaymentRecordOperation;
 import sn.examen.designpattern.badwalletapi.operation.TransferOperation;
 import sn.examen.designpattern.badwalletapi.operation.WithdrawOperation;
 import sn.examen.designpattern.badwalletapi.repository.TransactionRepository;
@@ -31,13 +34,16 @@ public class WalletService {
     private final TransactionRepository transactionRepository;
     private final WalletCodeGenerator codeGenerator;
     private final DepositStrategyFactory depositStrategyFactory;
+    private final BillPaymentGateway billPaymentGateway;
 
     public WalletService(WalletRepository walletRepository, TransactionRepository transactionRepository,
-                          WalletCodeGenerator codeGenerator, DepositStrategyFactory depositStrategyFactory) {
+                          WalletCodeGenerator codeGenerator, DepositStrategyFactory depositStrategyFactory,
+                          BillPaymentGateway billPaymentGateway) {
         this.walletRepository = walletRepository;
         this.transactionRepository = transactionRepository;
         this.codeGenerator = codeGenerator;
         this.depositStrategyFactory = depositStrategyFactory;
+        this.billPaymentGateway = billPaymentGateway;
     }
 
     public Wallet createWallet(WalletCreateRequest request) {
@@ -91,5 +97,19 @@ public class WalletService {
         Wallet sender = getByPhone(senderPhone);
         Wallet receiver = getByPhone(receiverPhone);
         return new TransferOperation(sender, receiver, amount, walletRepository, transactionRepository).execute();
+    }
+
+    public List<Transaction> payCurrentMonthBill(String phoneNumber, String serviceName, BigDecimal amount) {
+        Wallet wallet = getByPhone(phoneNumber);
+        PaymentReceipt receipt = billPaymentGateway.payCurrentMonth(wallet.getCode(), serviceName, amount);
+        return new PaymentRecordOperation(wallet, receipt.getAmountCharged(), serviceName, walletRepository, transactionRepository)
+                .execute();
+    }
+
+    public List<Transaction> payFactures(String phoneNumber, String serviceName, List<String> factureReferences) {
+        Wallet wallet = getByPhone(phoneNumber);
+        PaymentReceipt receipt = billPaymentGateway.payByReferences(wallet.getCode(), serviceName, factureReferences);
+        return new PaymentRecordOperation(wallet, receipt.getAmountCharged(), serviceName, walletRepository, transactionRepository)
+                .execute();
     }
 }
