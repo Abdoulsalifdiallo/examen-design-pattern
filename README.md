@@ -17,8 +17,13 @@ cd badwallet-api && mvn spring-boot:run
 Consoles H2 : `http://localhost:8081/h2-console` et `http://localhost:8080/h2-console`
 (JDBC URL `jdbc:h2:mem:paymentdb` / `jdbc:h2:mem:walletdb`, user `sa`, password vide).
 
-Le fichier [requests.http](requests.http) reprend l'ensemble des requetes de
-test (extension REST Client de VS Code).
+Le fichier [test.http](test.http) reprend l'ensemble des requetes de test du
+sujet (extension REST Client de VS Code), executables dans l'ordre.
+
+A la creation d'un portefeuille (manuelle ou via /seed), badwallet-api appelle
+automatiquement payment-service pour initialiser ses factures du mois en
+cours (3 ISM + 3 WOYAFAL) : aucune etape manuelle n'est necessaire avant de
+consulter ou payer ses factures.
 
 ## Design patterns appliques
 
