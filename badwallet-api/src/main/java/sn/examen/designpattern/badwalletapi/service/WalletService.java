@@ -9,6 +9,7 @@ import sn.examen.designpattern.badwalletapi.dto.WalletCreateRequest;
 import sn.examen.designpattern.badwalletapi.exception.InvalidOperationException;
 import sn.examen.designpattern.badwalletapi.exception.WalletNotFoundException;
 import sn.examen.designpattern.badwalletapi.operation.DepositOperation;
+import sn.examen.designpattern.badwalletapi.operation.TransferOperation;
 import sn.examen.designpattern.badwalletapi.operation.WithdrawOperation;
 import sn.examen.designpattern.badwalletapi.repository.TransactionRepository;
 import sn.examen.designpattern.badwalletapi.repository.WalletRepository;
@@ -84,5 +85,11 @@ public class WalletService {
         Wallet wallet = getByPhone(phoneNumber);
         WithdrawalCalculation calculation = new CappedPercentageFeeDecorator(new BaseWithdrawalCalculation());
         return new WithdrawOperation(wallet, amount, calculation, walletRepository, transactionRepository).execute();
+    }
+
+    public List<Transaction> transfer(String senderPhone, String receiverPhone, BigDecimal amount) {
+        Wallet sender = getByPhone(senderPhone);
+        Wallet receiver = getByPhone(receiverPhone);
+        return new TransferOperation(sender, receiver, amount, walletRepository, transactionRepository).execute();
     }
 }
