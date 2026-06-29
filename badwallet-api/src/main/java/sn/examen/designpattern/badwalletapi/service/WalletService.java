@@ -112,4 +112,9 @@ public class WalletService {
         return new PaymentRecordOperation(wallet, receipt.getAmountCharged(), serviceName, walletRepository, transactionRepository)
                 .execute();
     }
+
+    public List<Transaction> getTransactions(String phoneNumber) {
+        Wallet wallet = getByPhone(phoneNumber);
+        return transactionRepository.findByWalletIdOrderByTimestampDesc(wallet.getId());
+    }
 }

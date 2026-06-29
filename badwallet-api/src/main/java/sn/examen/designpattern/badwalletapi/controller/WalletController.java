@@ -89,4 +89,9 @@ public class WalletController {
         return walletService.payFactures(request.getPhoneNumber(), request.getServiceName(), request.getFactureReferences())
                 .stream().map(TransactionResponse::new).toList();
     }
+
+    @GetMapping("/{phone}/transactions")
+    public List<TransactionResponse> getTransactions(@PathVariable String phone) {
+        return walletService.getTransactions(phone).stream().map(TransactionResponse::new).toList();
+    }
 }
