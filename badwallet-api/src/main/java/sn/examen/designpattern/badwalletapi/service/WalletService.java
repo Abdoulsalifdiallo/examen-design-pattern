@@ -5,6 +5,8 @@ import sn.examen.designpattern.badwalletapi.dto.WalletCreateRequest;
 import sn.examen.designpattern.badwalletapi.exception.InvalidOperationException;
 import sn.examen.designpattern.badwalletapi.repository.WalletRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,5 +40,9 @@ public class WalletService {
                 .currency(request.getCurrency())
                 .build();
         return walletRepository.save(wallet);
+    }
+
+    public Page<Wallet> listWallets(Pageable pageable) {
+        return walletRepository.findAll(pageable);
     }
 }
