@@ -9,6 +9,8 @@ import java.util.List;
  */
 public interface BillPaymentGateway {
 
+    void initializeFactures(String walletCode);
+
     PaymentReceipt payCurrentMonth(String walletCode, String serviceName, BigDecimal amount);
 
     PaymentReceipt payByReferences(String walletCode, String serviceName, List<String> factureReferences);
