@@ -5,6 +5,7 @@ import sn.examen.designpattern.badwalletapi.dto.BalanceResponse;
 import sn.examen.designpattern.badwalletapi.dto.DepositRequest;
 import sn.examen.designpattern.badwalletapi.dto.TransactionResponse;
 import sn.examen.designpattern.badwalletapi.dto.WalletCreateRequest;
+import sn.examen.designpattern.badwalletapi.dto.TransferRequest;
 import sn.examen.designpattern.badwalletapi.dto.WalletResponse;
 import sn.examen.designpattern.badwalletapi.dto.WithdrawRequest;
 import sn.examen.designpattern.badwalletapi.service.WalletService;
@@ -66,6 +67,12 @@ public class WalletController {
     @PostMapping("/withdraw")
     public List<TransactionResponse> withdraw(@Valid @RequestBody WithdrawRequest request) {
         return walletService.withdraw(request.getPhoneNumber(), request.getAmount())
+                .stream().map(TransactionResponse::new).toList();
+    }
+
+    @PostMapping("/transfer")
+    public List<TransactionResponse> transfer(@Valid @RequestBody TransferRequest request) {
+        return walletService.transfer(request.getSenderPhone(), request.getReceiverPhone(), request.getAmount())
                 .stream().map(TransactionResponse::new).toList();
     }
 }
