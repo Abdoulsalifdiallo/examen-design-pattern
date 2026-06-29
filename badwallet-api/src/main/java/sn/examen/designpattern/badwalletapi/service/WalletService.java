@@ -18,6 +18,8 @@ import sn.examen.designpattern.badwalletapi.repository.TransactionRepository;
 import sn.examen.designpattern.badwalletapi.repository.WalletRepository;
 import sn.examen.designpattern.badwalletapi.strategy.DepositStrategyFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,8 @@ import java.util.List;
 @Service
 @Transactional
 public class WalletService {
+
+    private static final Logger log = LoggerFactory.getLogger(WalletService.class);
 
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
@@ -63,7 +67,22 @@ public class WalletService {
                 .balance(request.getInitialBalance())
                 .currency(request.getCurrency())
                 .build();
-        return walletRepository.save(wallet);
+        wallet = walletRepository.save(wallet);
+        initializeFacturesBestEffort(wallet.getCode());
+        return wallet;
+    }
+
+    /**
+     * L'initialisation des factures chez payment-service est une consequence
+     * de la creation du wallet, pas une condition de celle-ci : si
+     * payment-service est indisponible, le wallet reste cree.
+     */
+    private void initializeFacturesBestEffort(String walletCode) {
+        try {
+            billPaymentGateway.initializeFactures(walletCode);
+        } catch (RuntimeException ex) {
+            log.warn("Initialisation des factures impossible pour {} : {}", walletCode, ex.getMessage());
+        }
     }
 
     public Page<Wallet> listWallets(Pageable pageable) {

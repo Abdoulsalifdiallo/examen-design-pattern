@@ -29,6 +29,21 @@ public class PaymentServiceAdapter implements BillPaymentGateway {
     }
 
     @Override
+    public void initializeFactures(String walletCode) {
+        try {
+            paymentServiceClient.post()
+                    .uri("/api/factures/init")
+                    .body(Map.of("walletCode", walletCode))
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (RestClientResponseException ex) {
+            throw translate(ex);
+        } catch (RestClientException ex) {
+            throw new ExternalServiceException("payment-service est inaccessible : " + ex.getMessage());
+        }
+    }
+
+    @Override
     public PaymentReceipt payCurrentMonth(String walletCode, String serviceName, BigDecimal amount) {
         return call(Map.of(
                 "walletCode", walletCode,
