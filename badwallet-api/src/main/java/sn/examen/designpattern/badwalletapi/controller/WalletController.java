@@ -10,6 +10,7 @@ import sn.examen.designpattern.badwalletapi.dto.WalletCreateRequest;
 import sn.examen.designpattern.badwalletapi.dto.TransferRequest;
 import sn.examen.designpattern.badwalletapi.dto.WalletResponse;
 import sn.examen.designpattern.badwalletapi.dto.WithdrawRequest;
+import sn.examen.designpattern.badwalletapi.service.WalletSeederService;
 import sn.examen.designpattern.badwalletapi.service.WalletService;
 
 import jakarta.validation.Valid;
@@ -26,15 +27,29 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/wallets")
 public class WalletController {
 
     private final WalletService walletService;
+    private final WalletSeederService walletSeederService;
 
-    public WalletController(WalletService walletService) {
+    public WalletController(WalletService walletService, WalletSeederService walletSeederService) {
         this.walletService = walletService;
+        this.walletSeederService = walletSeederService;
+    }
+
+    @PostMapping("/seed")
+    public ResponseEntity<Map<String, Object>> seed(@RequestParam(defaultValue = "10") int numWallets,
+                                                      @RequestParam(defaultValue = "100") int eventsPerWallet) {
+        walletSeederService.seed(numWallets, eventsPerWallet);
+        return ResponseEntity.accepted().body(Map.of(
+                "message", "Seed demarre en arriere-plan",
+                "numWallets", numWallets,
+                "eventsPerWallet", eventsPerWallet
+        ));
     }
 
     @PostMapping
