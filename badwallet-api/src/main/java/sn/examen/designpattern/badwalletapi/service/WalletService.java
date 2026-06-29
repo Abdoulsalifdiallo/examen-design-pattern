@@ -3,6 +3,7 @@ package sn.examen.designpattern.badwalletapi.service;
 import sn.examen.designpattern.badwalletapi.domain.Wallet;
 import sn.examen.designpattern.badwalletapi.dto.WalletCreateRequest;
 import sn.examen.designpattern.badwalletapi.exception.InvalidOperationException;
+import sn.examen.designpattern.badwalletapi.exception.WalletNotFoundException;
 import sn.examen.designpattern.badwalletapi.repository.WalletRepository;
 
 import org.springframework.data.domain.Page;
@@ -44,5 +45,15 @@ public class WalletService {
 
     public Page<Wallet> listWallets(Pageable pageable) {
         return walletRepository.findAll(pageable);
+    }
+
+    public Wallet getByPhone(String phoneNumber) {
+        return walletRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new WalletNotFoundException("Aucun portefeuille pour " + phoneNumber));
+    }
+
+    public Wallet getById(Long id) {
+        return walletRepository.findById(id)
+                .orElseThrow(() -> new WalletNotFoundException("Aucun portefeuille avec l'id " + id));
     }
 }
